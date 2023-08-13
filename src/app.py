@@ -1,134 +1,91 @@
-
+# Import Key libraries and packages
 import gradio as gr
+
 import pandas as pd
 import numpy as np
-import pickle
+
 import os
+import pickle
+
+import xgboost as xgb
+from xgboost import XGBClassifier
+
+# Create key lists
+churn_inputs = ["TotalCharges", "MonthlyCharges", "tenure", "StreamingTV", "PaperlessBilling", "DeviceProtection", "TechSupport", "InternetService", "OnlineSecurity", "StreamingMovies", "PaymentMethod", "Dependents", "Partner",
+                "tenure_group", "OnlineBackup", "gender", "SeniorCitizen", "MultipleLines", "Contract", "PhoneService"]
 
 
 
 # Useful functions
-def load_ml_components(fp):
-    "Load the ml components to re-use in app"
-    with open(fp, "rb") as f:
-        object = pickle.load(f)
-        return object
-
-# Instantiating ML_items
-loaded_object = load_saved_objets()
-pipeline_of_my_app = loaded_object["pipeline"]
-num_cols = loaded_object['numeric_columns']
-cat_cols = loaded_object['categorical_columns']
-encoder_categories = loaded_object["encoder_categories"]
-
-# image
-gr.image("https://www.marktechpost.com/wp-content/uploads/2023/02/stock-market-chart-virtual-screen-with-woman-s-hand-digital-remix-scaled.jpg")
-
-
-# Main function to collect the inputs process them and outpuT the predicition
-def predict_churn(
-    TotalCharges,
-    MonthlyCharges,
-    tenure, 
-    StreamingTV,
-    PaperlessBilling,
-    DeviceProtection,
-    TechSupport,
-    InternetService,
-    OnlineSecurity,
-    StreamingMovies,
-    PaymentMethod,
-    Dependents,
-    Parter,
-    tenure_group,
-    OnlineBackup,
-    gender,
-    SeniorCitizen,
-    MultipleLines,
-    Contract,
-    PhoneService,
-):
-     
-
+# Load ML toolkit
+def load_toolkit(file_path = "C:/Users/LPM/Desktop/Customer_Churn_App/src/app.py"):
+    """"_summary_
     
-    
-    
- # Dataframe creation
-    df = pd.DataFrame(
-        [
-            [
-                TotalCharges,
-                MonthlyCharges,
-                tenure, 
-                StreamingTV,
-                PaperlessBilling,
-                DeviceProtection,
-                TechSupport,
-                InternetService,
-                OnlineSecurity,
-                StreamingMovies,
-                PaymentMethod,
-                Dependents,
-                Parter,
-                tenure_group,
-                OnlineBackup,
-                gender,
-                SeniorCitizen,
-                MultipleLines,
-                Contract,
-                PhoneService,
-                         
-            ]
-        ],
-        columns= num_cols + cat_cols,
-    ).replace("", np.nan)
-    
-    df[cat_cols] = df[cat_cols].astype("object")
-    
-    # Passing data to pipeline to make prediction
-    output = pipeline_of_my_app.predict(df)
-    
-    # Labelling Model output
-    if output == 0:
-        model_output = "No"
-    else:
-        model_output = "Yes"
-
-    return model_output            
-            
-            
-# Setting up app interface and data inputs
-inputs = []
-
-with gr.Blocks() as demo:
-    
-    # Setting Titles for App
-    gr.Markdown("<h2 style='text-align: center;'> Customer Churn Prediction App </h2> ", unsafe_allow_html=True)
-    gr.Markdown("<h6 style='text-align: center;'> (Fill in the details below and click on PREDICT button to make a prediction for Customer Churn) </h6> ", unsafe_allow_html=True)   
-    
-    with gr.Column(): #main frame 
+    Args:
+        file_path (_type_, optional): _description_. Defaults to'src'.
         
-        with gr.Row(): #col 1 : for num features
-
-            for i in num_cols:
-                inputs.append(gr.Number(label=f"Input {i} "))
-        
-        with gr.Row(): #col 2 : for cat features
-
-            for (lab, choices) in zip(cat_cols, encoder_categories):
-                inputs.append(gr.inputs.Dropdown(
-                choices=choices.tolist(),
-                type="value",
-                label=f"Select {lab}",
-                default=choices.tolist()[0],))
-    # Setting up preediction Button
-    with gr.Row():
-        make_prediction = gr.Button("Predict")
+    Returns:
+        returns machine learning items
+    """
+    with open(file_path, "rb") as file:
+        loaded_toolkit = pickle.load(file)
+        return loaded_toolkit
     
-    # Setting up prediction output Row
-    with gr.Row():
-        output_prediction = gr.Text(label="Will Customer Churn?")
-    make_prediction.click(predict_churn, inputs, output_prediction)
+# Import the toolkit
+loaded_toolkit = load_toolkit()
 
-# Launching app
-demo.launch()
+# import the scaler
+scaler = loaded_toolkit["scaler"]
+
+# Import the model
+model = XGBClassifier()
+model.load_model()
+
+# Function to process Input and return prediction
+def churn_predict(*args, scaler = scaler, model = model):
+    """"_summary_
+    
+    Args:
+        scaler (_type_, optional): _description_. Defaults to scaler.
+        model (_type_, optional): _description_. Defaults to model
+    """
+    # Convert inputs into a dataframe
+    input_data = pd.DataFrame([args], columns=churn_inputs)
+    
+    #Scale the numeric columns
+    input_data[churn_inputs] = scaler.transform(input_data[churn_inputs])
+    
+    # Make the prediction
+    model_output = model.predict_proba(input_data)
+
+
+# App Interface
+# Inputs
+TotalCharges = gr.Number(...)
+MonthlyCharges = gr.Number(...)
+tenure = gr.Number(...)
+StreamingTV = gr.Dropdown(["Select StreamingTV", "No", "Yes", "No Internet Service"], info="Select StreamingTV")
+PaperlessBilling = gr.Dropdown(["Select PaperlessBilling", "No", "Yes"])
+DeviceProtection = gr.Dropdown(["Select Device Protection", "No", "Yes"])
+TechSupport = gr.Dropdown(["Select TechSupport", "No", "Yes"])
+InternetService = gr.Dropdown(["Select Internet Service", "DSL", "Fiber optic", "No"])
+OnlineSecurity = gr.Dropdown(["Select OnlineSecurity", "No", "Yes", "No internet service"])
+StreamingMovies = gr.Dropdown(["Select StreamingMovies", "No", "Yes", "No internet service"])
+PaymentMethod = gr.Dropdown(["Select PaymentMethod", "Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"])
+Dependents = gr.Dropdown(["Select Dependents", "No", "Yes"])
+Partner = gr.Dropdown(["Select Partner", "Yes", "No"])
+tenure_group = gr.Dropdown(["Select tenure_group", "less_than_1yr", "less_than_3yr", "less_than_4yr", "less_than_2yr", "greater_than_5yr", "less_than_5yr"])
+OnlineBackup = gr.Dropdown(["Select OnlineBackup", "Yes", "No", "No internet service"])
+gender = gr.Dropdown(["Select gender", "Female", "Male"])
+SeniorCitizen = gr.Dropdown(["Select SeniorCitizen", "No", "Yes"])
+MultipleLines = gr.Dropdown(["Select MultipleLines", "No phone service", "No", "Yes"])
+Contract = gr.Dropdown(["Select Contract", "Month-to-month", "One year", "Two year"])
+PhoneService = gr.Dropdown(["Select PhoneService", "No", "Yes"])
+
+
+# Output
+gr.Interface(inputs = [TotalCharges, MonthlyCharges, tenure, StreamingTV, PaperlessBilling, DeviceProtection, TechSupport, InternetService, OnlineSecurity, StreamingMovies, PaymentMethod, Dependents, Partner,
+                         tenure_group, OnlineBackup, gender, SeniorCitizen, MultipleLines, Contract, PhoneService],
+             
+             outputs= gr.Label("Awaiting Submission..."), 
+             fn= churn_predict, title = "App For Customer Churn Prediction").launch(inbrowser=True, show_error=True, share=True)
