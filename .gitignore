@@ -5,6 +5,7 @@ __pycache__/
 
 /.env
 /train.csv
+/_pycache_
 
 # C extensions
 *.so
