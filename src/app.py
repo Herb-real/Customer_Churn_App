@@ -18,7 +18,7 @@ churn_inputs = ["TotalCharges", "MonthlyCharges", "tenure", "StreamingTV", "Pape
 
 # Useful functions
 # Load ML toolkit
-def load_toolkit(file_path = "C:/Users/LPM/Desktop/Customer_Churn_App/src/app.py"):
+def load_toolkit(file_path = "src"):
     """"_summary_
     
     Args:
@@ -27,7 +27,7 @@ def load_toolkit(file_path = "C:/Users/LPM/Desktop/Customer_Churn_App/src/app.py
     Returns:
         returns machine learning items
     """
-    with open(file_path, "rb") as file:
+    with open(file_path, "src") as file:
         loaded_toolkit = pickle.load(file)
         return loaded_toolkit
     
@@ -89,3 +89,4 @@ gr.Interface(inputs = [TotalCharges, MonthlyCharges, tenure, StreamingTV, Paperl
              
              outputs= gr.Label("Awaiting Submission..."), 
              fn= churn_predict, title = "App For Customer Churn Prediction").launch(inbrowser=True, show_error=True, share=True)
+
