@@ -18,7 +18,7 @@ churn_inputs = ["TotalCharges", "MonthlyCharges", "tenure", "StreamingTV", "Pape
 
 # Useful functions
 # Load ML toolkit
-def load_toolkit(file_path = "C:/Users/LPM/Desktop/Customer_Churn_App/src/app.py"):
+def load_toolkit(file_path = "src"):
     """"_summary_
     
     Args:
