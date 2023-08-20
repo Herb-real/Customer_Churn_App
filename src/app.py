@@ -1,92 +1,134 @@
-# Import Key libraries and packages
-import gradio as gr
-
+import joblib 
 import pandas as pd
 import numpy as np
-
-import os
+import gradio as gr
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.feature_selection import SelectKBest
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from sklearn.utils.class_weight import compute_class_weight
+import gradio as gr
+import joblib
+import warnings
 import pickle
+import os
 
-import xgboost as xgb
-from xgboost import XGBClassifier
+warnings.filterwarnings("ignore")
 
-# Create key lists
-churn_inputs = ["TotalCharges", "MonthlyCharges", "tenure", "StreamingTV", "PaperlessBilling", "DeviceProtection", "TechSupport", "InternetService", "OnlineSecurity", "StreamingMovies", "PaymentMethod", "Dependents", "Partner",
-                "tenure_group", "OnlineBackup", "gender", "SeniorCitizen", "MultipleLines", "Contract", "PhoneService"]
+def loadml_components(fp):
+    'loading model'
+    with open(fp, 'rb') as f:
+        object = pickle.load(f)
+    return object
+
+# Setup
+## Variables and constants
+_file_ = "src"
+DIRPATH = os.path.dirname(os.path.realpath(_file_))  
+fp = os.path.join(DIRPATH, "assets", "ml", "ml.pkl")
+
+## Execution
+# ml_components_dict = loadml_components(fp=ml_core_fp)
+
+# model= joblib.load("models/LR.joblib")
+
+# model
+
+# test= pd.read_csv("dataframes/Vodafone_churn.csv")
+# test
+
+# ##testing our model
+# model.predict(test)
+
+##creating a function to return a string depending on the output of the model
+
+def classify(num):
+    if num == 0:
+        return "Customer will not Churn"
+    else:
+        return "Customer will churn"
 
 
+"""creating a function for my gradion fn
+defining my parameters which my fucntion will accept, and are the same as the features I trained my model on"""
 
-# Useful functions
-# Load ML toolkit
-def load_toolkit(file_path = "src"):
-    """"_summary_
+
+def predict_churn(SeniorCitizen, Partner, Dependents, tenure, InternetService,
+                  OnlineSecurity, OnlineBackup, DeviceProtection, TechSupport,
+                  StreamingTV, StreamingMovies, Contract, PaperlessBilling,
+                  PaymentMethod, MonthlyCharges, TotalCharges): 
+
+     
+     ##in the code below, I am created a list of my input features
+
+    input_data = [
+        SeniorCitizen, Partner, Dependents, tenure, InternetService,
+        OnlineSecurity, OnlineBackup, DeviceProtection, TechSupport,
+        StreamingTV, StreamingMovies, Contract, PaperlessBilling,
+        PaymentMethod, MonthlyCharges, TotalCharges
+    ]    
+##I am changing my features into a dataframe since that is how I trained my model
+
+    input_df = pd.DataFrame([input_data], columns=[
+        "SeniorCitizen", "Partner", "Dependents", "tenure", "InternetService",
+        "OnlineSecurity", "OnlineBackup", "DeviceProtection", "TechSupport",
+        "StreamingTV", "StreamingMovies", "Contract", "PaperlessBilling",
+        "PaymentMethod", "MonthlyCharges", "TotalCharges"
+    ])
+
+
+    # pred = model.predict(input_df) ##I am making a prediction on the input data.
+
+    # output = classify(pred[0]) ## I am passing the first predction through my classify function I created earlier
+
+    if output == "Customer will not Churn":
+        return [(0, output)]
+    else:
+        return [(1, output)]   ##setting my function to return the binary classification and the written output
+
+output = gr.outputs.HighlightedText(color_map={
+    "Customer will not Churn": "green",
+    "Customer will churn": "red"
+}) ##assigning colors to the respective output 
+
+##building my interface and wrapping my model in the function
+
+##using gradio blocks to beautify my output
+
+block= gr.Blocks(theme= "freddyaboulton/dracula_revamped") ##instatiating my blocks class
+
+with block:
+    gr.Markdown(""" # Welcome to My Customer Churn Prediction App""")
     
-    Args:
-        file_path (_type_, optional): _description_. Defaults to'src'.
-        
-    Returns:
-        returns machine learning items
-    """
-    with open(file_path, "src") as file:
-        loaded_toolkit = pickle.load(file)
-        return loaded_toolkit
+    input=[gr.inputs.Slider(minimum=0, maximum= 1, step=1, label="SeniorCitizen: Select 1 for Yes and 0 for No"),
+        gr.inputs.Radio(["Yes", "No"], label="Partner: Do You Have a Partner?"),
+        gr.inputs.Radio(["Yes", "No"], label="Dependents: Do You Have a Dependent?"),
+        gr.inputs.Number(label="tenure: How Long Have You Been with Vodafone in Months?"),
+        gr.inputs.Radio(["DSL", "Fiber optic", "No"], label="What Internet Service Do You Use?"),
+        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Have Online Security?"),
+        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Have Any Online Backup Service?"),
+        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Use Any Device Protection?"),
+        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Use TechSupport?"),
+        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Stream TV?"),
+        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Stream Movies?"),
+        gr.inputs.Radio(["Month-to-month", "One year", "Two year"], label="What Is Your Contract Type?"),
+        gr.inputs.Radio(["Yes", "No"], label=" Do You Use Paperless Billing?"),
+        gr.inputs.Radio([
+            "Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"
+        ], label="What Payment Method Do You Use?"),
+        gr.inputs.Number(label="What is you Monthly Charges?"),
+        gr.inputs.Number(label="How Much Is Your Total Charges?")]
+     
+    output= gr.outputs.HighlightedText(color_map={
+     "Customer will not Churn": "green",
+     "Customer will churn": "red"}, label= "Your Output")     
+    predict_btn= gr.Button("Predict")
+     
+    predict_btn.click(fn= predict_churn, inputs= input, outputs=output)
+
+block.launch()
     
-# Import the toolkit
-loaded_toolkit = load_toolkit()
-
-# import the scaler
-scaler = loaded_toolkit["scaler"]
-
-# Import the model
-model = XGBClassifier()
-model.load_model()
-
-# Function to process Input and return prediction
-def churn_predict(*args, scaler = scaler, model = model):
-    """"_summary_
-    
-    Args:
-        scaler (_type_, optional): _description_. Defaults to scaler.
-        model (_type_, optional): _description_. Defaults to model
-    """
-    # Convert inputs into a dataframe
-    input_data = pd.DataFrame([args], columns=churn_inputs)
-    
-    #Scale the numeric columns
-    input_data[churn_inputs] = scaler.transform(input_data[churn_inputs])
-    
-    # Make the prediction
-    model_output = model.predict_proba(input_data)
-
-
-# App Interface
-# Inputs
-TotalCharges = gr.Number(...)
-MonthlyCharges = gr.Number(...)
-tenure = gr.Number(...)
-StreamingTV = gr.Dropdown(["Select StreamingTV", "No", "Yes", "No Internet Service"], info="Select StreamingTV")
-PaperlessBilling = gr.Dropdown(["Select PaperlessBilling", "No", "Yes"])
-DeviceProtection = gr.Dropdown(["Select Device Protection", "No", "Yes"])
-TechSupport = gr.Dropdown(["Select TechSupport", "No", "Yes"])
-InternetService = gr.Dropdown(["Select Internet Service", "DSL", "Fiber optic", "No"])
-OnlineSecurity = gr.Dropdown(["Select OnlineSecurity", "No", "Yes", "No internet service"])
-StreamingMovies = gr.Dropdown(["Select StreamingMovies", "No", "Yes", "No internet service"])
-PaymentMethod = gr.Dropdown(["Select PaymentMethod", "Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"])
-Dependents = gr.Dropdown(["Select Dependents", "No", "Yes"])
-Partner = gr.Dropdown(["Select Partner", "Yes", "No"])
-tenure_group = gr.Dropdown(["Select tenure_group", "less_than_1yr", "less_than_3yr", "less_than_4yr", "less_than_2yr", "greater_than_5yr", "less_than_5yr"])
-OnlineBackup = gr.Dropdown(["Select OnlineBackup", "Yes", "No", "No internet service"])
-gender = gr.Dropdown(["Select gender", "Female", "Male"])
-SeniorCitizen = gr.Dropdown(["Select SeniorCitizen", "No", "Yes"])
-MultipleLines = gr.Dropdown(["Select MultipleLines", "No phone service", "No", "Yes"])
-Contract = gr.Dropdown(["Select Contract", "Month-to-month", "One year", "Two year"])
-PhoneService = gr.Dropdown(["Select PhoneService", "No", "Yes"])
-
-
-# Output
-gr.Interface(inputs = [TotalCharges, MonthlyCharges, tenure, StreamingTV, PaperlessBilling, DeviceProtection, TechSupport, InternetService, OnlineSecurity, StreamingMovies, PaymentMethod, Dependents, Partner,
-                         tenure_group, OnlineBackup, gender, SeniorCitizen, MultipleLines, Contract, PhoneService],
-             
-             outputs= gr.Label("Awaiting Submission..."), 
-             fn= churn_predict, title = "App For Customer Churn Prediction").launch(inbrowser=True, show_error=True, share=True)
 
