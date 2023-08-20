@@ -101,22 +101,22 @@ output = gr.outputs.HighlightedText(color_map={
 block= gr.Blocks(theme= "freddyaboulton/dracula_revamped") ##instatiating my blocks class
 
 with block:
-    gr.Markdown(""" # Welcome to My Customer Churn Prediction App""")
+    gr.Markdown(""" # Welcome to App for Customer Churn Prediction """)
     
     input=[gr.inputs.Slider(minimum=0, maximum= 1, step=1, label="SeniorCitizen: Select 1 for Yes and 0 for No"),
         gr.inputs.Radio(["Yes", "No"], label="Partner: Do You Have a Partner?"),
         gr.inputs.Radio(["Yes", "No"], label="Dependents: Do You Have a Dependent?"),
         gr.inputs.Number(label="tenure: How Long Have You Been with Vodafone in Months?"),
-        gr.inputs.Radio(["DSL", "Fiber optic", "No"], label="What Internet Service Do You Use?"),
-        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Have Online Security?"),
-        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Have Any Online Backup Service?"),
-        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Use Any Device Protection?"),
-        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Use TechSupport?"),
-        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Stream TV?"),
-        gr.inputs.Radio(["Yes", "No", "No internet service"], label="Do You Stream Movies?"),
-        gr.inputs.Radio(["Month-to-month", "One year", "Two year"], label="What Is Your Contract Type?"),
-        gr.inputs.Radio(["Yes", "No"], label=" Do You Use Paperless Billing?"),
-        gr.inputs.Radio([
+        gr.inputs.Dropdown(["DSL", "Fiber optic", "No"], label="What Internet Service Do You Use?"),
+        gr.inputs.Dropdown(["Yes", "No", "No internet service"], label="Do You Have Online Security?"),
+        gr.inputs.Dropdown(["Yes", "No", "No internet service"], label="Do You Have Any Online Backup Service?"),
+        gr.inputs.Dropdown(["Yes", "No", "No internet service"], label="Do You Use Any Device Protection?"),
+        gr.inputs.Dropdown(["Yes", "No", "No internet service"], label="Do You Use TechSupport?"),
+        gr.inputs.Dropdown(["Yes", "No", "No internet service"], label="Do You Stream TV?"),
+        gr.inputs.Dropdown(["Yes", "No", "No internet service"], label="Do You Stream Movies?"),
+        gr.inputs.Dropdown(["Month-to-month", "One year", "Two year"], label="What Is Your Contract Type?"),
+        gr.inputs.Dropdown(["Yes", "No"], label=" Do You Use Paperless Billing?"),
+        gr.inputs.Dropdown([
             "Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"
         ], label="What Payment Method Do You Use?"),
         gr.inputs.Number(label="What is you Monthly Charges?"),
