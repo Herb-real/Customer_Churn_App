@@ -28,14 +28,6 @@ The both long command-lines have a same structure, they pipe multiple commands u
 
 NB: For MacOs users, please install Xcode if you have an issue.
 
-# Summary
-_________________________________________________________________________________________________
-______________________
-|Code    |
-|________|
-|  P4    |
-|        |
-
 # 🔧 The Gradio App
 __________________________________________________________________________________________________
 We intend to utilize the Gradio library for app development. Within the app, there will be interactive elements like dropdown menus, sliders, and radio buttons that collect user inputs and retain them as variables. Additionally, we will establish an output element that presents the churn prediction produced by the machine learning model.
