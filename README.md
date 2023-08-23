@@ -39,3 +39,11 @@ To Run the app: Start the Gradio app by calling the launch() method on the Gradi
 block.launch()
 
 This will launch a local web server and open a browser window with the Gradio interface. Then you just click on run and you're good to go.
+
+# Screenshot
+_________________________________________________________________________________________________
+![Alt text](<Screenshot (183).png>) 
+![Alt text](<Screenshot (184).png>)
+
+# Author
+Herbert DJANIE
